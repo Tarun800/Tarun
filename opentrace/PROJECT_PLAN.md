@@ -1,6 +1,7 @@
 # OpenTrace development plan and evidence log
 
 ## MVP status
+- Latest validation attempt: automated workflow added; run status pending GitHub Actions
 - [x] Public profile lookup
 - [x] Public repository listing
 - [x] Repository metrics from public API responses
