@@ -52,3 +52,7 @@ test("repository browsing and honest coverage notes are present", () => {
   assert.match(app, /repositoryCoverage/);
   assert.match(app, /merged pull-request search is limited and may be incomplete/);
 });
+
+test("username input pattern is compatible with modern browser RegExp syntax", () => {
+  assert.ok(html.includes('pattern="[A-Za-z0-9\\\\-]+"'), "hyphen must be escaped for the Unicode sets (v) regex mode");
+});
