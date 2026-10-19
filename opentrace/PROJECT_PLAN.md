@@ -8,8 +8,12 @@
 - [x] JSON report export
 - [x] API error/rate-limit messaging
 - [x] Responsive layout and skip link
-- [ ] Automated tests
-- [ ] Pagination and API coverage indicators
+- [x] Shared utility functions with unit tests
+- [x] GitHub Actions workflow for syntax checks and unit tests
+- [x] Basic project documentation and license
+- [ ] Confirm the GitHub Actions workflow passes on the repository
+- [ ] Add pagination and API coverage indicators
+- [ ] Add repository filtering and comparison
 - [ ] Accessibility audit
 - [ ] Independent code review
 - [ ] User testing
