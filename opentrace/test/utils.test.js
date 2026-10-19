@@ -54,5 +54,6 @@ test("repository browsing and honest coverage notes are present", () => {
 });
 
 test("username input pattern is compatible with modern browser RegExp syntax", () => {
-  assert.ok(html.includes('pattern="[A-Za-z0-9\\\\-]+"'), "hyphen must be escaped for the Unicode sets (v) regex mode");
+  const escapedHyphen = String.fromCharCode(92) + "-";
+  assert.ok(html.includes('pattern="[A-Za-z0-9' + escapedHyphen + ']+"'), "hyphen must be escaped for the Unicode sets (v) regex mode");
 });
