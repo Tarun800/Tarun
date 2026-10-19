@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Explore public GitHub repositories and contribution activity with links to source records.">
+<title>OpenTrace — Open-source contribution explorer</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header><a class="brand" href="#"><span>OT</span> OpenTrace</a><a href="https://docs.github.com/en/rest" target="_blank" rel="noopener noreferrer">GitHub API docs ↗</a></header>
+<main id="main">
+<section class="hero">
+<p class="eyebrow">OPEN-SOURCE CONTRIBUTION EXPLORER</p>
+<h1>Make your public work<br><em>easier to understand.</em></h1>
+<p class="intro">Explore public GitHub repositories and merged pull requests. Every result links to its source so people can verify the underlying activity.</p>
+<form id="search-form">
+<label for="username">GitHub username</label>
+<div class="search-row"><input id="username" name="username" required maxlength="39" pattern="[A-Za-z0-9-]+" placeholder="e.g. octocat"><button id="search-button">Explore profile</button></div>
+<p class="hint">Public API only. No password or personal access token requested.</p>
+</form>
+<p id="status" role="status" aria-live="polite">Enter a public GitHub username to begin.</p>
+</section>
+<section id="results" hidden>
+<div class="section-head"><div><p class="eyebrow">PROFILE OVERVIEW</p><h2>Contribution snapshot</h2></div><button id="export-button" class="secondary" type="button" disabled>Export JSON report</button></div>
+<div id="profile" class="profile"></div><div id="stats" class="stats"></div>
+<div class="columns"><section class="panel"><h3>Recent public repositories</h3><div id="repos"></div></section><section class="panel"><h3>Merged pull requests</h3><div id="prs"></div></section></div>
+<p class="warning"><strong>Interpret carefully:</strong> this is an exploratory summary of public API records, not a verified assessment of skill, leadership, impact or immigration eligibility. API limits and indexing may affect results. Open source records to verify context.</p>
+</section>
+<section class="how"><p class="eyebrow">TRANSPARENCY FIRST</p><h2>Explore, verify, stay honest.</h2><div class="columns"><article class="panel"><h3>Explore</h3><p>Review public repositories and selected merged pull requests.</p></article><article class="panel"><h3>Verify</h3><p>Follow source links instead of relying on an untraceable score.</p></article><article class="panel"><h3>Stay honest</h3><p>Activity counts alone do not prove quality, impact or leadership.</p></article></div></section>
+</main>
+<footer><span>OpenTrace · Portfolio MVP</span><span>Not affiliated with GitHub or an immigration authority.</span></footer>
+<script src="app.js"></script>
+</body></html>
