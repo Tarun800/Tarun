@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Explore public GitHub repositories and contribution activity with links to source records.">
+<meta name="theme-color" content="#f5f7fa">
 <title>OpenTrace — Open-source contribution explorer</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -17,7 +18,7 @@
 <p class="intro">Explore public GitHub repositories and merged pull requests. Every result links to its source so people can verify the underlying activity.</p>
 <form id="search-form">
 <label for="username">GitHub username</label>
-<div class="search-row"><input id="username" name="username" required maxlength="39" pattern="[A-Za-z0-9-]+" placeholder="e.g. octocat"><button id="search-button">Explore profile</button></div>
+<div class="search-row"><input id="username" name="username" required maxlength="39" pattern="[A-Za-z0-9-]+" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="e.g. octocat"><button id="search-button">Explore profile</button></div>
 <p class="hint">Public API only. No password or personal access token requested.</p>
 </form>
 <p id="status" role="status" aria-live="polite">Enter a public GitHub username to begin.</p>
@@ -25,7 +26,13 @@
 <section id="results" hidden>
 <div class="section-head"><div><p class="eyebrow">PROFILE OVERVIEW</p><h2>Contribution snapshot</h2></div><button id="export-button" class="secondary" type="button" disabled>Export JSON report</button></div>
 <div id="profile" class="profile"></div><div id="stats" class="stats"></div>
-<div class="columns"><section class="panel"><h3>Recent public repositories</h3><div id="repos"></div></section><section class="panel"><h3>Merged pull requests</h3><div id="prs"></div></section></div>
+<div class="columns">
+<section class="panel"><h3>Public repositories</h3><div class="repo-controls">
+<div><label for="repo-filter">Filter repositories</label><input id="repo-filter" type="search" placeholder="Name, description or language"></div>
+<div><label for="repo-sort">Sort by</label><select id="repo-sort"><option value="updated">Recently updated</option><option value="stars">Most stars</option><option value="name">Name A–Z</option></select></div>
+</div><div id="repos"></div><div class="pagination"><button id="repo-prev" class="secondary" type="button" disabled>Previous</button><span id="repo-page-info" aria-live="polite">No repositories loaded</span><button id="repo-next" class="secondary" type="button" disabled>Next</button></div><p class="hint">At most 100 recently updated repositories are loaded from the public API.</p></section>
+<section class="panel"><h3>Merged pull requests</h3><div id="prs"></div><p class="hint">Search results are limited and may not include every contribution.</p></section>
+</div>
 <p class="warning"><strong>Interpret carefully:</strong> this is an exploratory summary of public API records, not a verified assessment of skill, leadership, impact or immigration eligibility. API limits and indexing may affect results. Open source records to verify context.</p>
 </section>
 <section class="how"><p class="eyebrow">TRANSPARENCY FIRST</p><h2>Explore, verify, stay honest.</h2><div class="columns"><article class="panel"><h3>Explore</h3><p>Review public repositories and selected merged pull requests.</p></article><article class="panel"><h3>Verify</h3><p>Follow source links instead of relying on an untraceable score.</p></article><article class="panel"><h3>Stay honest</h3><p>Activity counts alone do not prove quality, impact or leadership.</p></article></div></section>
