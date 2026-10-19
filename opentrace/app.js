@@ -9,8 +9,16 @@ const profileEl = document.querySelector("#profile");
 const statsEl = document.querySelector("#stats");
 const reposEl = document.querySelector("#repos");
 const prsEl = document.querySelector("#prs");
+const repoFilter = document.querySelector("#repo-filter");
+const repoSort = document.querySelector("#repo-sort");
+const repoPageInfo = document.querySelector("#repo-page-info");
+const repoPrev = document.querySelector("#repo-prev");
+const repoNext = document.querySelector("#repo-next");
 const exportBtn = document.querySelector("#export-button");
 let report = null;
+let allRepositories = [];
+let currentRepoPage = 1;
+const PAGE_SIZE = 10;
 
 function setStatus(message, type = "") {
   statusEl.textContent = message;
@@ -37,6 +45,49 @@ function repositoryItem(repo) {
   return item(r.name, r.url, r.description,
     '★ ' + n(r.stars) + ' · Forks ' + n(r.forks) + ' · ' + esc(r.language) + ' · Updated ' + date(r.updatedAt));
 }
+function filteredRepositories() {
+  const query = repoFilter.value.trim().toLocaleLowerCase();
+  const filtered = allRepositories.filter(function (repo) {
+    const summary = repositorySummary(repo);
+    return !query || [summary.name, summary.description, summary.language].join(" ").toLocaleLowerCase().includes(query);
+  });
+  if (repoSort.value === "stars") filtered.sort((a, b) => Number(b.stargazers_count || 0) - Number(a.stargazers_count || 0));
+  else if (repoSort.value === "name") filtered.sort((a, b) => repositorySummary(a).name.localeCompare(repositorySummary(b).name));
+  else filtered.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+  return filtered;
+}
+function renderRepositories() {
+  const filtered = filteredRepositories();
+  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  currentRepoPage = Math.min(Math.max(1, currentRepoPage), pages);
+  const start = (currentRepoPage - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(start, start + PAGE_SIZE);
+  reposEl.innerHTML = pageItems.length
+    ? pageItems.map(repositoryItem).join("")
+    : "<p>No repositories match this filter.</p>";
+  repoPageInfo.textContent = filtered.length
+    ? "Showing " + n(start + 1) + "–" + n(start + pageItems.length) + " of " + n(filtered.length) + " loaded repositories"
+    : "0 matching repositories";
+  repoPrev.disabled = currentRepoPage <= 1;
+  repoNext.disabled = currentRepoPage >= pages;
+}
+repoFilter.addEventListener("input", function () {
+  currentRepoPage = 1;
+  renderRepositories();
+});
+repoSort.addEventListener("change", function () {
+  currentRepoPage = 1;
+  renderRepositories();
+});
+repoPrev.addEventListener("click", function () {
+  currentRepoPage -= 1;
+  renderRepositories();
+});
+repoNext.addEventListener("click", function () {
+  currentRepoPage += 1;
+  renderRepositories();
+});
+
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
   const username = input.value.trim();
@@ -49,6 +100,9 @@ form.addEventListener("submit", async function (event) {
   exportBtn.disabled = true;
   results.hidden = true;
   report = null;
+  allRepositories = [];
+  repoFilter.value = "";
+  currentRepoPage = 1;
   setStatus("Loading public profile and repositories…");
   try {
     const encoded = encodeURIComponent(username);
@@ -56,6 +110,7 @@ form.addEventListener("submit", async function (event) {
       get(API + "/users/" + encoded),
       get(API + "/users/" + encoded + "/repos?per_page=100&sort=updated&type=owner")
     ]);
+    allRepositories = repositories;
     setStatus("Searching public merged pull requests…");
     let pullRequests = [];
     let pullRequestSearchNote = "";
@@ -67,8 +122,7 @@ form.addEventListener("submit", async function (event) {
           title: pr.title,
           url: pr.html_url,
           repository: (pr.repository_url || "").replace("https://api.github.com/repos/", ""),
-          closedAt: pr.closed_at || null,
-          mergedAt: pr.pull_request && pr.pull_request.merged_at ? pr.pull_request.merged_at : null
+          closedAt: pr.closed_at || null
         };
       });
     } catch (error) {
@@ -82,15 +136,13 @@ form.addEventListener("submit", async function (event) {
       ' · <a href="' + esc(user.html_url) + '" target="_blank" rel="noopener noreferrer">View profile ↗</a></p></div>';
     statsEl.innerHTML =
       metric(user.public_repos, "Public repositories", "Profile API") +
-      metric(stars, "Stars in returned repositories", "Fetched repository list") +
-      metric(forks, "Forks in returned repositories", "Fetched repository list") +
-      metric(pullRequests.length, "Merged PRs found", "Search may be incomplete");
-    reposEl.innerHTML = repositories.length
-      ? repositories.slice(0, 10).map(repositoryItem).join("")
-      : "<p>No public repositories returned.</p>";
+      metric(stars, "Stars in loaded repositories", "Up to 100 repositories") +
+      metric(forks, "Forks in loaded repositories", "Up to 100 repositories") +
+      metric(pullRequests.length, "Merged PRs found", "Search results may be incomplete");
+    renderRepositories();
     prsEl.innerHTML = pullRequests.length
       ? pullRequests.slice(0, 10).map(function (pr) {
-          return item(pr.title, pr.url, pr.repository, "Merged " + date(pr.mergedAt || pr.closedAt));
+          return item(pr.title, pr.url, pr.repository, "Closed (merged) " + date(pr.closedAt));
         }).join("")
       : "<p>No merged pull requests returned. This does not prove there are none.</p>";
     if (pullRequestSearchNote) {
@@ -99,8 +151,9 @@ form.addEventListener("submit", async function (event) {
     report = {
       generatedAt: new Date().toISOString(),
       source: "GitHub public REST API",
-      caveat: "Exploratory only; API indexing and rate limits affect results. Counts do not establish contribution quality, impact or eligibility.",
+      caveat: "Exploratory only. Repository data is limited to the first 100 most recently updated owned repositories; merged pull-request search is limited and may be incomplete. Counts do not establish contribution quality, impact or eligibility.",
       profile: { login: user.login, name: user.name, url: user.html_url, publicRepos: user.public_repos, followers: user.followers },
+      repositoryCoverage: { returned: repositories.length, profileReportedTotal: Number(user.public_repos || 0), limit: 100 },
       repositories: repositories.map(repositorySummary),
       mergedPullRequests: pullRequests
     };
@@ -109,7 +162,7 @@ form.addEventListener("submit", async function (event) {
     setStatus("Loaded public data for @" + user.login + ". Verify records at their source links.", "success");
     results.scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (error) {
-    setStatus(error.message || "Could not load profile.", "error");
+    setStatus(error.message || "Could not load profile. Check your connection and try again.", "error");
   } finally {
     btn.disabled = false;
   }
@@ -123,5 +176,5 @@ exportBtn.addEventListener("click", function () {
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
-  URL.revokeObjectURL(blobUrl);
+  window.setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 1000);
 });
