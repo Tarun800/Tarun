@@ -25,11 +25,24 @@ function setStatus(message, type = "") {
   statusEl.className = type;
 }
 async function get(url) {
-  const response = await fetch(url, { headers: { Accept: "application/vnd.github+json" } });
-  if (response.status === 403 || response.status === 429) throw new Error("GitHub API rate limit reached. Please wait and try again.");
-  if (response.status === 404) throw new Error("GitHub username or resource not found.");
-  if (!response.ok) throw new Error("GitHub API request failed (" + response.status + ").");
-  return response.json();
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: "application/vnd.github+json" },
+      signal: controller.signal
+    });
+    if (response.status === 403 || response.status === 429) throw new Error("GitHub API rate limit reached. Please wait a minute and try again.");
+    if (response.status === 404) throw new Error("GitHub username or resource not found.");
+    if (!response.ok) throw new Error("GitHub API request failed (" + response.status + ").");
+    return await response.json();
+  } catch (error) {
+    if (error.name === "AbortError") throw new Error("GitHub API request timed out. Check your connection and try again.");
+    if (error instanceof TypeError) throw new Error("Could not connect to GitHub. Check your internet connection and try again.");
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 }
 function item(title, url, description, meta = "") {
   return '<article class="item"><a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' +
