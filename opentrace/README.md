@@ -2,6 +2,9 @@
 
 OpenTrace is a static web application that explores public GitHub profile data, repositories, and a limited search for merged pull requests. It is built with HTML, CSS and vanilla JavaScript.
 
+## Deployment
+The repository includes a GitHub Actions workflow for deploying this folder to GitHub Pages. Deployment is only considered complete after the workflow succeeds and the published site is verified.
+
 ## Try it
 1. Open a terminal in the `opentrace` directory.
 2. Run `python -m http.server 8000`.
